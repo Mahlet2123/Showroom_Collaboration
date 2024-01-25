@@ -1,12 +1,15 @@
 from django.db import models
+from helpers.models import TimestampsModel
 from django.contrib.auth.models import User
 
-class ApplicationListingCategory(models.Model):
+class ApplicationListingCategory(TimestampsModel):
     name = models.CharField(max_length=255)
     image = models.FileField(upload_to='application_listing_category_images')
-    created_at = models.DateTimeField(auto_now_add=True)
 
-class ApplicationListing(models.Model):
+    def __str__(self):
+        return self.name
+
+class ApplicationListing(TimestampsModel):
     vendor = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.ForeignKey(ApplicationListingCategory, on_delete=models.CASCADE)
     request_id = models.IntegerField()
@@ -19,29 +22,24 @@ class ApplicationListing(models.Model):
     physical_address = models.CharField(max_length=255)
     need_investor = models.BooleanField()
     need_market = models.BooleanField()
-    created_at = models.DateTimeField(auto_now_add=True)
 
-class ApplicationListingRequest(models.Model):
+class ApplicationListingRequest(TimestampsModel):
     listing_category = models.ForeignKey(ApplicationListingCategory, on_delete=models.CASCADE)
     id_type = models.CharField(max_length=255, choices=[('listing_type_1', 'Listing Type 1'), ('listing_type_2', 'Listing Type 2')])
     id_front = models.FileField(upload_to='application_listing_request_id_front')
     id_back = models.FileField(upload_to='application_listing_request_id_back')
     listing_type = models.TextField()
     is_approved = models.BooleanField()
-    created_at = models.DateTimeField(auto_now_add=True)
 
-class ApplicationListingImage(models.Model):
+class ApplicationListingImage(TimestampsModel):
     image = models.FileField(upload_to='application_listing_images')
     listing = models.ForeignKey(ApplicationListing, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
 
-class ApplicationListingFile(models.Model):
+class ApplicationListingFile(TimestampsModel):
     file = models.FileField(upload_to='application_listing_files')
     listing = models.ForeignKey(ApplicationListing, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
 
-class ApplicationListingReview(models.Model):
+class ApplicationListingReview(TimestampsModel):
     listing = models.ForeignKey(ApplicationListing, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     comment = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
