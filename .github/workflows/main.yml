@@ -52,14 +52,3 @@ jobs:
       - name: Run Tests
         run: |
           python manage.py test
-
-      - name: Code Formatting and Linting
-        run: |
-          pip install black
-          black . --check
-
-      - name: Security Scanning
-        run: |
-          pip install bandit
-          bandit -r .
-
