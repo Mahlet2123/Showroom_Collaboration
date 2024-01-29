@@ -8,7 +8,7 @@ from django.views.generic import RedirectView
 
 schema_view = get_schema_view(
    openapi.Info(
-      title="INCOME EXPENSES API",
+      title="ShowRoom",
       default_version='v1',
       description="Test description",
       terms_of_service="https://www.ourapp.com/policies/terms/",

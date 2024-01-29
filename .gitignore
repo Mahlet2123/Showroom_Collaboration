@@ -154,3 +154,6 @@ VENV/
 ENV/
 env.bak/
 venv.bak/
+#images
+application_listing_category_images/
+listings\vendors\id_files\
