@@ -81,3 +81,28 @@ class ApplicationListingSearchView(views.APIView):
             return Response('No Application Matching Such Query', HTTP_404_NOT_FOUND)
 
         return Response('please include search_query in your request body', HTTP_400_BAD_REQUEST)
+
+
+
+class AllApplicationListingView(generics.ListAPIView):
+    
+    #View for getting all application listing.
+    
+    queryset = ApplicationListing.objects.order_by('-created_at')
+    serializer_class = ApplicationListingSerializer
+    filter_backends = (OrderingFilter, SearchFilter)
+    ordering_fields = ('created_at', 'name')
+    pagination_class = PageNumberPagination
+    permission_classes = [IsAuthenticated]
+  
+    
+
+    def list(self, request):
+        queryset = self.get_queryset()
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({'data': serializer.data}, status=HTTP_200_OK)
