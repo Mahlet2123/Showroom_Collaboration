@@ -50,3 +50,69 @@ class ApplicationListingTest(TestCase):
         ApplicationListingCategory.objects.all().delete()
         ApplicationListingRequest.objects.all().delete()
         ApplicationListing.objects.all().delete()
+
+class ApplicationListingAPITests(APITestCase):
+    def setUp(self):
+        # Create a user
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.category = ApplicationListingCategory.objects.create(name="Test Category")
+        self.client = APIClient()
+
+    def test_application_listing_request_success(self):
+        self.client.force_authenticate(user=self.user)
+        url = reverse('listing-request')
+        data = {
+            "email": "test@example.com",
+            "listing_category": self.category.id,
+            "id_type": "NIN",
+            "listing_type": "Software",
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        
+    def test_application_listing_request_unauthorized(self):
+        url = reverse('listing-request')
+        data = {
+            "email": "test@example.com",
+            "listing_category": self.category.id,
+            "id_type": "NIN",
+            "listing_type": "Software",
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_application_listing_vendor_request_success(self):
+        self.client.force_authenticate(user=self.user)
+        url = reverse('vendor-listing-request')
+        data = {
+            "name": "Test Listing",
+            "description": "A test listing",
+            "country": "Country",
+            "province": "Province",
+            "city": "City",
+            "phone_number": "1234567890",
+            "physical_address": "123 Test St",
+            "need_investor": False,
+            "need_market": False,
+            "category": self.category.id
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_application_listing_vendor_request_unauthorized(self):
+        url = reverse('vendor-listing-request')
+        data = {
+            "name": "Test Listing",
+            "description": "A test listing",
+            "country": "Country",
+            "province": "Province",
+            "city": "City",
+            "phone_number": "1234567890",
+            "physical_address": "123 Test St",
+            "need_investor": False,
+            "need_market": False,
+            "category": self.category.id
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+

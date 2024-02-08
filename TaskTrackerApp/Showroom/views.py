@@ -3,11 +3,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST, HTTP_201_CREATED
 from rest_framework.pagination import PageNumberPagination
-from .serializers import ApplicationListingSerializer
+from .serializers import ApplicationListingSerializer, ApplicationListingRequestSerializer
 from .models import ApplicationListing
 from django.db.models import Q
+from rest_framework.views import APIView
+from drf_yasg.utils import swagger_auto_schema
+
 
 
 class ApplicationListingView(generics.ListAPIView):
@@ -58,7 +61,7 @@ class ApplicationListingSearchView(views.APIView):
     """
     API endpoint for searching Software/Application listings using POST method.
     """
-
+    @swagger_auto_schema(request_body=ApplicationListingSerializer)
     def post(self, request, *args, **kwargs):
         """
         Handles search requests and returns a paginated list of matching listings.
@@ -104,3 +107,68 @@ class AllApplicationListingView(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data': serializer.data}, status=HTTP_200_OK)    
+    
+    
+    
+class ApplicationListingRequestView(APIView):
+    """
+    Creates a new application listing request.
+    
+    This view allows authenticated users to submit a request for creating a new
+    software/application listing. The request must include all necessary details
+    as specified in the ApplicationListingRequestSerializer. Only authenticated
+    users can access this endpoint.
+    """
+    permission_classes = [IsAuthenticated]
+    
+    @swagger_auto_schema(request_body=ApplicationListingRequestSerializer)
+    def post(self, request, *args, **kwargs) -> Response:
+        """
+        Handles POST request to create a new application listing request.
+        
+        Parameters:
+        - request (Request): The request object containing all necessary data.
+        
+        Returns:
+        - Response: The serialized application listing request data on success, or
+                    error details on failure.
+        """
+        serializer = ApplicationListingRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=HTTP_201_CREATED)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+    
+    
+class ApplicationListingVendorRequestView(APIView):
+    """
+    Submits a new vendor application listing request.
+    
+    This API endpoint enables authenticated vendors to request the addition of a new
+    listing under their account. The endpoint expects data conforming to the
+    ApplicationListingSerializer structure. It's designed for vendors who wish to expand
+    their visibility by adding more software/application listings to the platform.
+    Authentication is required to access this endpoint.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(request_body=ApplicationListingSerializer)
+    def post(self, request, *args, **kwargs) -> Response:
+        """
+        Processes POST request to create a vendor-specific application listing.
+        
+        Parameters:
+        - request (Request): The request object, including listing details.
+        
+        Returns:
+        - Response: The serialized application listing data on successful creation,
+                    or error information on failure.
+        """
+        data = request.data.copy()  # Copy the data to add the vendor manually
+        data['vendor'] = request.user.pk  # Assume vendor is the current user
+        serializer = ApplicationListingSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=HTTP_201_CREATED)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
