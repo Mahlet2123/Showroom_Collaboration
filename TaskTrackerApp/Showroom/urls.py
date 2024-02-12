@@ -8,6 +8,6 @@ urlpatterns = [
     path('api/listings/', AllApplicationListingView.as_view(), name='listing-all'),
     path('api/listings/request/', ApplicationListingRequestView.as_view(), name='listing-request'),
     path('api/listings/vendor/request/', ApplicationListingVendorRequestView.as_view(), name='vendor-listing-request'),
-
+    path('api/listings/create/', ApplicationListingCreateView.as_view(), name='create-listing'),
 ]
 

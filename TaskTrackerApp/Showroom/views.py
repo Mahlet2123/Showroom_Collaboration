@@ -108,7 +108,15 @@ class AllApplicationListingView(generics.ListAPIView):
         serializer = self.get_serializer(queryset, many=True)
         return Response({'data': serializer.data}, status=HTTP_200_OK)    
     
-    
+
+class ApplicationListingCreateView(generics.CreateAPIView):
+    serializer_class = ApplicationListingSerializer
+    queryset = ApplicationListing.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        return serializer.save(vendor = self.request.user) 
+        
     
 class ApplicationListingRequestView(APIView):
     """
